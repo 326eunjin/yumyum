@@ -12,6 +12,7 @@ from datetime import datetime
 from .serializers import RestaurantSerializer, OperatingHourSerializer
 from .models import Restaurant, Reservation
 from reviews.models import Review
+from utils import category
 
 # Create your views here.
 class CreateRestaurantView(APIView):
@@ -390,8 +391,11 @@ class NearbyRestaurantInfoView(APIView):
         latitude = request.GET.get('latitude')
         longitude = request.GET.get('longitude')
         dist = request.GET.get('dist')
-        dist = float(dist) if dist else 0.5
-        if not (latitude, longitude) or dist < 0:
+        try:
+            dist = float(dist) if dist else 0.5
+        except Exception:
+            dist = 0
+        if None in (latitude, longitude) or dist <= 0:
             return Response({
                 "status": "error",
                 "error": {
@@ -402,12 +406,9 @@ class NearbyRestaurantInfoView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
             
         user_location = Point((float(latitude), float(longitude)), srid=4326)
+        query = Q(location__distance_lte=(user_location, D(km=dist)))
+        restaurants = Restaurant.objects.filter(query)
         
-        if dist > 0:
-            query = Q(location__distance_lte=(user_location, D(km=dist)))
-            restaurants = Restaurant.objects.filter(query)
-        else:
-            restaurants = Restaurant.objects.all()
         restaurant_list = []
         for restaurant in restaurants:
             restaurant_list.append({
@@ -415,6 +416,40 @@ class NearbyRestaurantInfoView(APIView):
                 "category":restaurant.category,
                 "latitude":restaurant.latitude,
                 "longitude":restaurant.longitude,
+            })
+        return Response({
+            "status":"success",
+            "message":"All restaurants retrieved successfully",
+            "restaurants":restaurant_list,
+        }, status=status.HTTP_200_OK)
+
+class AllRestaurantInfoView(APIView):
+    def get(self, request):
+        latitude = request.GET.get('latitude')
+        longitude = request.GET.get('longitude')
+        if None in(latitude, longitude):
+            return Response({
+                "status": "error",
+                "error": {
+                    "code": 400,
+                    "message": "Bad Request",
+                    "details": "Invalid input data"
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        restaurant_list = []
+        for restaurant in Restaurant.objects.all():
+            dist = distance((float(latitude), float(longitude)), (restaurant.latitude, restaurant.longitude))
+            categories = []
+            for ctgr in restaurant.category:
+                categories.append(category.category_name[ctgr])
+            restaurant_list.append({
+                "restaurant_id": restaurant.restaurant_id,
+                "category": categories,
+                "latitude": restaurant.latitude,
+                "longitude": restaurant.longitude,
+                "dist": str(dist),
+                "waiting": len(restaurant.queue.all()),
             })
         return Response({
             "status":"success",
