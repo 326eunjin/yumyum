@@ -391,7 +391,7 @@ class NearbyRestaurantInfoView(APIView):
         longitude = request.GET.get('longitude')
         dist = request.GET.get('dist')
         dist = float(dist) if dist else 0.5
-        if not (latitude, longitude):
+        if not (latitude, longitude) or dist < 0:
             return Response({
                 "status": "error",
                 "error": {
@@ -402,9 +402,12 @@ class NearbyRestaurantInfoView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
             
         user_location = Point((float(latitude), float(longitude)), srid=4326)
-        query = Q(location__distance_lte=(user_location, D(km=dist)))
         
-        restaurants = Restaurant.objects.filter(query)
+        if dist > 0:
+            query = Q(location__distance_lte=(user_location, D(km=dist)))
+            restaurants = Restaurant.objects.filter(query)
+        else:
+            restaurants = Restaurant.objects.all()
         restaurant_list = []
         for restaurant in restaurants:
             restaurant_list.append({
