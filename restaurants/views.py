@@ -408,7 +408,7 @@ class WriteReivew(APIView):
                         "stars": review.stars,
                         "menu": review.menu,
                         "contents": review.contents,
-                        "images" : review.images,
+                    #    "images" : review.images,
                         "created_at": review.created_at,
                         "updated_at": review.updated_at
                     }
@@ -425,6 +425,59 @@ class WriteReivew(APIView):
                 }
                 return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error : 세션 만료"}, status=status.HTTP_400_BAD_REQUEST)
+
+class EditReview(APIView):
+    @transaction.atomic
+    def put(self, request, restaurant_id, review_id):    #리뷰 수정 코드
+        user = request.user
+        if user.is_authenticated:
+            name = request.data.get('name')
+            stars = request.data.get('stars')
+            menu = request.data.get('menu')
+            contents = request.data.get('contents')
+
+            if not (name, stars, menu, contents):
+                return Response({"error": "평점과 리뷰 내용이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                restaurant = Restaurant.objects.get(restaurant_id=restaurant_id)
+                review = Review.objects.get(restaurant=restaurant, user=user, review_id=review_id)
+            except Restaurant.DoesNotExist:
+                return Response({"error": "레스토랑을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+            except Review.DoesNotExist:
+                return Response({"error": "리뷰를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+            # 새로운 데이터로 리뷰 업데이트
+            review.stars = stars
+            review.menu = menu
+            review.contents = contents
+            review.save()
+
+            # 레스토랑의 평균 평점 업데이트
+            star_avg = Review.objects.filter(restaurant=restaurant).aggregate(Avg('stars'))['stars__avg']
+            restaurant.star_avg = star_avg
+            restaurant.save()
+
+            response_data = {
+                "status": "success",
+                "message": "리뷰가 성공적으로 업데이트되었습니다.",
+                "data": {
+                    "restaurant_id": restaurant.restaurant_id,
+                    "restaurant_name": restaurant.name,
+                    "review_id": review.review_id,
+                    "user_id": user.user_id,
+                    "stars": review.stars,
+                    "menu": review.menu,
+                    "contents": review.contents,
+                    "images": review.images,
+                    "created_at": review.created_at,
+                    "updated_at": review.updated_at
+                }
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        return Response({"error": "세션 만료"}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class NearbyRestaurantInfoView(APIView):
     def get(self, request):
