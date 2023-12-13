@@ -470,6 +470,7 @@ class AllRestaurantInfoView(APIView):
         for restaurant in Restaurant.objects.all():
             if category in restaurant.category:
                 restaurant_location_list.append({
+                    "restaurant_id": restaurant.restaurant_id,
                     "lat": restaurant.latitude,
                     "lng": restaurant.longitude,
                 })
