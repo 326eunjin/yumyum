@@ -13,7 +13,6 @@ from .serializers import RestaurantSerializer, OperatingHourSerializer
 from .models import Restaurant, Reservation
 from reviews.models import Review
 from config import settings
-from utils import category
 
 # Create your views here.
 class CreateRestaurantView(APIView):

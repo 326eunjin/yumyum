@@ -3,6 +3,7 @@ from restaurants.models import Restaurant
 from users.models import User
 from django.contrib.postgres.fields import ArrayField
 from utils.aws import S3ImgUploader
+from config.settings import S3_base_url
 import os
 
 class Review(models.Model):
@@ -25,7 +26,7 @@ class Review(models.Model):
         if os.path.exists(img_path):
             with open(img_path, "rb") as img:
                 url = S3ImgUploader(img).upload_review_img(self.review_id)
-                self.image = url
+                self.image = S3_base_url + url
                 self.save()
                 return url
         return None
