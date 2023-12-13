@@ -408,6 +408,7 @@ class WriteReivew(APIView):
                         "stars": review.stars,
                         "menu": review.menu,
                         "contents": review.contents,
+                        "images" : review.images,
                         "created_at": review.created_at,
                         "updated_at": review.updated_at
                     }
