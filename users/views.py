@@ -253,21 +253,19 @@ class UserWaitingView(APIView):
     @transaction.atomic
     def delete(self, request):
         user = request.user
-        restaurant_id = request.data.get('restaurant_id')
-        restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).first()
-        if not restaurant:
-            return Response(
-                    {
-                        "status": "error",
-                        "error": {
-                            "code": 404,
-                            "message": "Not Found",
-                            "details": "Restaurant not found"
-                        }
-                    }, status=status.HTTP_404_NOT_FOUND)
-        
-        # 회원
         if user.is_authenticated:
+            restaurant_id = request.data.get('restaurant_id')
+            restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).first()
+            if not restaurant:
+                return Response({
+                    "status": "error",
+                    "error": {
+                        "code": 404,
+                        "message": "Not Found",
+                        "details": "Restaurant not found"
+                    }
+                }, status=status.HTTP_404_NOT_FOUND)
+        
             reservation = Reservation.objects.filter(restaurant=restaurant, user=user).first()
             if not reservation:
                 return Response(
@@ -279,19 +277,10 @@ class UserWaitingView(APIView):
                             "details": "Reservation not found or already canceled"
                         }
                     }, status=status.HTTP_404_NOT_FOUND)
-        # 비회원
-        else:
-            phone_number = request.data.get('phone_number')
-            if not phone_number:
-                return Response({"error":"Invalid input data"}, status=status.HTTP_400_BAD_REQUEST)
             
-            reservation = Reservation.objects.filter(restaurant=restaurant, phone_number=phone_number).first()
-            if not reservation:
-                return Response({"error":"Reservation not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        reservation_id = reservation.reservation_id
-        reservation.delete()
-        return Response(
+            reservation_id = reservation.reservation_id
+            reservation.delete()
+            return Response(
             {
                 "status": "success",
                 "message":"Reservation successfully canceled",
@@ -299,7 +288,16 @@ class UserWaitingView(APIView):
                     "reservation_id": reservation_id
                 }
             }, status=status.HTTP_200_OK)
-    
+        return Response({
+            "status": "error",
+            "error": {
+                "code": 401,
+                "message": "Unauthorized",
+                "details": "Session expired or not found"
+            }
+        }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
 class UserReviewListView(APIView):
     def get(self, request, user_id):
         user = request.user
