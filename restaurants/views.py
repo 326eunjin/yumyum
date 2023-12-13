@@ -97,7 +97,6 @@ class RestaurantInfoView(APIView):
             }
         }, status=status.HTTP_200_OK)
 
-############## 크롤링으로 키워드 기반 필터링 기능(분위기, 가격 등) 추가 필요 ###############
 class RestaurantFilterView(APIView):
     def get(self, request):
         user_restaurant_name = request.GET.get('restaurant_name', "")
