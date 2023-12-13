@@ -29,8 +29,7 @@ class S3ImgUploader:
             return True
         except Exception:
             return False
-        
-        
+
     def __upload(self, dir:str=""):
         s3_client = boto3.client(
             's3',
