@@ -77,6 +77,7 @@ class RestaurantInfoView(APIView):
                 "latitude": restaurant.latitude,
                 "address": restaurant.address,
                 "waiting": restaurant.user_set.count(),
+                "images": restaurant.images,
                 "is_24_hours": restaurant.is_24_hours,
                 "day_of_week": restaurant.day_of_week,
                 "start_time": str(restaurant.start_time.strftime("%H:%M")) if restaurant.start_time else "00:00",
