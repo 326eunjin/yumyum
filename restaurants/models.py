@@ -13,7 +13,7 @@ class Restaurant(models.Model):
     location = models.GeometryField(srid=4326)
     address = models.CharField()
     star_avg = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    images = ArrayField(models.URLField())
+    images = ArrayField(models.URLField(), default=list)
     
     is_24_hours = models.BooleanField(default=True)
     day_of_week = ArrayField(models.IntegerField())
@@ -41,7 +41,7 @@ class Restaurant(models.Model):
                 url = S3ImgUploader(img).upload_restaurant_img(self.restaurant_id)
                 self.images.append(url)
                 return url
-        return None
+        raise Exception('Invalid image file path')
 
 
 # Restaurant - User 관계의 중간테이블

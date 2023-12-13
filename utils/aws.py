@@ -4,6 +4,8 @@ class S3ImgUploader:
     """
         AWS_ACCESS_KEY 및 AWS_SECRET_ACCESS_KEY 환경변수 설정 필요
     """
+    base_img_url = "https://yumyum-s3-bucket.s3.ap-northeast-2.amazonaws.com/"
+    
     def __init__(self, file):
         self.file = file
 
@@ -11,11 +13,11 @@ class S3ImgUploader:
         return self.__upload()
     
     def upload_review_img(self, review_id:int=0):
-        dir = f"{dir}/" if review_id > 0 else ""
+        dir = f"{review_id}/" if review_id > 0 else ""
         return self.__upload(f'reviews/{dir}')
     
     def upload_restaurant_img(self, restaurant_id:int=0):
-        dir = f"{dir}/" if restaurant_id > 0 else ""
+        dir = f"{restaurant_id}/" if restaurant_id > 0 else ""
         return self.__upload(f'restaurants/{dir}')
         
     def __upload(self, dir:str=""):

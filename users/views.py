@@ -170,36 +170,26 @@ class AuthView(APIView):
 
 class UserInfoView(APIView):
     # 유저 조회
-    def get(self, request, user_id):
-        user = User.objects.filter(user_id=user_id).first()
-        if not user:
-            return Response({
-                "status": "error",
-                "error": {
-                    "code": 404,
-                    "message":"Not found",
-                    "details": "User not found"
-                }
-            }, status=status.HTTP_404_NOT_FOUND) ###################################################3
-        if request.user.is_authenticated and request.user == user:
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
             return Response({
                 "status": "success",
                 "message":"User information retrieved successfully",
                 "user": {
-                    "user_id":user_id,
+                    "user_id":user.user_id,
                     "name": user.name,
                     "phone_number": user.phone_number
                 }
             }, status=status.HTTP_200_OK)
-        return Response(
-            {
-                "status": "error",
-                "error": {
-                    "code": 401,
-                    "message": "Unauthorized",
-                    "details": "User has no authorization"
-                }
-            }, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+            "status": "error",
+            "error": {
+                "code": 401,
+                "message": "Unauthorized",
+                "details": "User has no authorization"
+            }
+        }, status=status.HTTP_401_UNAUTHORIZED)
 
     # 유저 삭제
     @transaction.atomic

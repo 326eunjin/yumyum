@@ -249,13 +249,36 @@ class RestaurantManagerView(APIView):
         pass
 
 class RestaurantManagementView(APIView):
-    permission_classes = [AllowAny]
-    
+    # 식당 사진 삽입
     def post(self, request, restaurant_id):
-        from utils.aws import S3ImgUploader
-        with open("/Users/hansu/Desktop/testPicture.png", "rb") as f:
-            url=S3ImgUploader(f).upload()
-        return Response({"message":"Save successful", "url":url})
+        img_path = request.data.get('img_path')
+        if not img_path:
+            return Response({
+                "status": "error",
+                "error": {
+                    "code": 400,
+                    "message": "Bad Request",
+                    "details": "Invalid image path",
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        restaurant = Restaurant.objects.filter(restaurant_id = restaurant_id).first()
+        if not restaurant:
+            return Response({
+                "status": "error",
+                "error": {
+                    "code": 404,
+                    "message": "Not Found",
+                    "details": "Restaurant not found",
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
+        url = restaurant.save_img(img_path)
+        return Response({
+            "status": "success",
+            "message": "Save successful",
+            "base_url": "https://yumyum-s3-bucket.s3.ap-northeast-2.amazonaws.com/",
+            "url": url,
+        }, status=status.HTTP_200_OK)
     
     # 식당 정보 변경
     @transaction.atomic
@@ -429,34 +452,17 @@ class NearbyRestaurantInfoView(APIView):
 
 class AllRestaurantInfoView(APIView):
     def get(self, request):
-        latitude = request.GET.get('latitude')
-        longitude = request.GET.get('longitude')
-        if None in(latitude, longitude):
-            return Response({
-                "status": "error",
-                "error": {
-                    "code": 400,
-                    "message": "Bad Request",
-                    "details": "Invalid input data"
-                }
-            }, status=status.HTTP_400_BAD_REQUEST)
+        category = int(request.GET.get('category'))
         
-        restaurant_list = []
+        restaurant_location_list = []
         for restaurant in Restaurant.objects.all():
-            dist = distance((float(latitude), float(longitude)), (restaurant.latitude, restaurant.longitude))
-            categories = []
-            for ctgr in restaurant.category:
-                categories.append(category.category_name[ctgr])
-            restaurant_list.append({
-                "restaurant_id": restaurant.restaurant_id,
-                "category": categories,
-                "latitude": restaurant.latitude,
-                "longitude": restaurant.longitude,
-                "dist": f"{dist.m:.2f}m",
-                # "waiting": restaurant.queue.count(),
-            })
+            if category in restaurant.category:
+                restaurant_location_list.append({
+                    "lat": restaurant.latitude,
+                    "lng": restaurant.longitude,
+                })
         return Response({
             "status":"success",
             "message":"All restaurants retrieved successfully",
-            "restaurants":restaurant_list,
+            "restaurants":restaurant_location_list,
         }, status=status.HTTP_200_OK)
