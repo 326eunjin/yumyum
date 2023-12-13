@@ -444,7 +444,7 @@ class NearbyRestaurantInfoView(APIView):
                 },
             }, status=status.HTTP_400_BAD_REQUEST)
             
-        user_location = Point((latitude, longitude), srid=4326)
+        user_location = Point((longitude, latitude), srid=4326)
         query = Q(location__distance_lte=(user_location, D(km=dist)))
         restaurants = Restaurant.objects.filter(query)
         
