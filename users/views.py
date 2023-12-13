@@ -302,7 +302,7 @@ class UserReviewListView(APIView):
         user = request.user
         if user.is_authenticated:
             review_infos = []
-            reviews = Review.objects.filter(user_id = user)
+            reviews = Review.objects.filter(user_id = user).order_by('-created_at')[:10]
             
             for review in reviews:
                 review_info = {
