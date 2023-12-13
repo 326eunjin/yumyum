@@ -24,8 +24,11 @@ class S3ImgUploader:
             aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
             aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
         )
-        
-        s3_client.delete_object(Bucket="yumyum-s3-bucket", Key=url)
+        try:
+            s3_client.delete_object(Bucket="yumyum-s3-bucket", Key=url)
+            return True
+        except Exception:
+            return False
         
         
     def __upload(self, dir:str=""):
