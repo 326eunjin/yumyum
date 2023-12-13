@@ -500,9 +500,11 @@ class NearbyRestaurantInfoView(APIView):
                     "details": "Invalid input data",
                 },
             }, status=status.HTTP_400_BAD_REQUEST)
-            
+        
+        now = datetime.now()
         user_location = Point((longitude, latitude), srid=4326)
         query = Q(location__distance_lte=(user_location, D(km=dist)))
+        query &= (Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now)) # 운영시간 확인
         restaurants = Restaurant.objects.filter(query)
         
         restaurant_list = []
