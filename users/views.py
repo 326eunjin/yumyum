@@ -298,7 +298,7 @@ class UserWaitingView(APIView):
         
         
 class UserReviewListView(APIView):
-    def get(self, request, user_id):
+    def get(self, request):
         user = request.user
         if user.is_authenticated:
             review_infos = []
@@ -332,7 +332,7 @@ class UserReviewListView(APIView):
         return Response(error_response, status = status.HTTP_401_UNAUTHORIZED)
         
 class DeleteReview(APIView):
-    def delete(self, request, user_id, review_id):
+    def delete(self, request, review_id):
         user = request.user
         if user.is_authenticated:
             try:

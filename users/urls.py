@@ -9,6 +9,6 @@ urlpatterns = [
     path('auth/refresh/', TokenRefreshView.as_view()),
     path('mypage/', UserInfoView.as_view()),
     path('waitings/', UserWaitingView.as_view()),
-    path('<int:user_id>/reviews/', UserReviewListView.as_view()),           #유저 리뷰 조회
-    path('<int:user_id>/reviews/<int:review_id>', DeleteReview.as_view()),  #리뷰 삭제
+    path('reviews/', UserReviewListView.as_view()),           #유저 리뷰 조회
+    path('reviews/<int:review_id>', DeleteReview.as_view()),  #리뷰 삭제
 ]
