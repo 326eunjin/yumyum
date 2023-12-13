@@ -12,7 +12,7 @@ class Review(models.Model):
     stars = models.IntegerField()
     contents = models.CharField(max_length=500, blank=True, null=True)
     menu = ArrayField(models.CharField(max_length=100))
-    images = ArrayField(models.URLField())
+    image = models.URLField()
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -25,6 +25,7 @@ class Review(models.Model):
         if os.path.exists(img_path):
             with open(img_path, "rb") as img:
                 url = S3ImgUploader(img).upload_review_img(self.review_id)
-                self.images.append(url)
+                self.image = url
+                self.save()
                 return url
         return None

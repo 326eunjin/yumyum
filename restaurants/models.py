@@ -13,7 +13,7 @@ class Restaurant(models.Model):
     location = models.GeometryField(srid=4326)
     address = models.CharField()
     star_avg = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    images = ArrayField(models.URLField(), default=list)
+    image = models.URLField()
     
     is_24_hours = models.BooleanField(default=True)
     day_of_week = ArrayField(models.IntegerField())
@@ -39,7 +39,8 @@ class Restaurant(models.Model):
         if os.path.exists(img_path):
             with open(img_path, "rb") as img:
                 url = S3ImgUploader(img).upload_restaurant_img(self.restaurant_id)
-                self.images.append(url)
+                self.image = url
+                self.save()
                 return url
         raise Exception('Invalid image file path')
 
