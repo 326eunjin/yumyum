@@ -165,8 +165,8 @@ class RestaurantAlternativeView(APIView):
                 "category": alter_restaurant.category,
                 "is_24_hours": alter_restaurant.is_24_hours,
                 "day_of_week": alter_restaurant.day_of_week,
-                "start_time": str(alter_restaurant.start_time.strftime("%H:%M")),
-                "end_time": str(alter_restaurant.end_time.strftime("%H:%M")),
+                "start_time": str(alter_restaurant.start_time.strftime("%H:%M")) if alter_restaurant.start_time else "00:00",
+                "end_time": str(alter_restaurant.end_time.strftime("%H:%M"))if alter_restaurant.end_time else "00:00",
                 "etc_reason": alter_restaurant.etc_reason,
                 "distance": f'{dist:.2f}m'
             })
