@@ -148,8 +148,10 @@ class RestaurantAlternativeView(APIView):
         location = Point(float(longitude), float(latitude), srid=4326)
         categories = restaurant.category
         
+        now = datetime.now()
         query = Q(location__distance_lte=(location,D(km=1)))
         query = ~Q(restaurant_id=restaurant_id)
+        query &= (Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now)) # 운영시간 확인
         for category_id in categories:
             query &= Q(category__contains=[category_id])
             
