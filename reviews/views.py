@@ -11,7 +11,9 @@ from .models import Review
 
 
 class ReviewThread(APIView):  # thread 만들기
-    def get(self, request, user_id, restaurant_id):
+    def get(self, request):
+        user_id = request.GET.get('user_id')
+        restaurant_id = request.GET.get('restaurant_id')
         restaurant = Restaurant.objects.filter(
             pk=restaurant_id
         ).first()  # Restaurant 가져오기
@@ -20,7 +22,14 @@ class ReviewThread(APIView):  # thread 만들기
         user_latitude = request.GET.get("latitude")
 
         if not (user_longitude and user_latitude):
-            return Response({"error": "잘못된 요청"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "status": "error",
+                "error": {
+                    "code": 400,
+                    "message": "BadRequest",
+                    "details": "Invalid parameters. Please provide valid location data."
+                }
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         user_location = Point(float(user_longitude), float(user_latitude), srid=4326)
 
@@ -39,6 +48,7 @@ class ReviewThread(APIView):  # thread 만들기
                 {
                     "review_id": review.review_id,
                     "restaurant_name": restaurant.name,
+                    "category": restaurant.category,
                     "user_id": user.user_id,
                     "user_name": user.name,
                     "stars": review.stars,
@@ -48,4 +58,9 @@ class ReviewThread(APIView):  # thread 만들기
                     "updated_at": review.updated_at,
                 }
             )
-        return Response({"review_list": review_list}, status=status.HTTP_200_OK)
+        return Response({
+            "status": "success",
+            "message": "Nearby restauant reviews retrived sucessfully.",
+            "reviews": review_list
+            }, status=status.HTTP_200_OK)
+        
