@@ -1,5 +1,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.gis.db import models
+from utils.aws import S3ImgUploader
+import os
 
 
 class Restaurant(models.Model):
@@ -10,11 +12,14 @@ class Restaurant(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     location = models.GeometryField(srid=4326)
     address = models.CharField()
+    images = ArrayField(models.URLField())
+    
     is_24_hours = models.BooleanField(default=True)
     day_of_week = ArrayField(models.IntegerField())
     start_time = models.TimeField(null=True)
     end_time = models.TimeField(null=True)
     etc_reason = models.TextField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,6 +33,14 @@ class Restaurant(models.Model):
         # 해당 레스토랑의 리뷰를 기반으로 평균 별점을 계산
         avg_rating = self.review_set.aggregate(models.Avg('stars'))['stars__avg']
         return avg_rating if avg_rating is not None else 0
+    
+    def save_img(self, img_path):
+        if os.path.exists(img_path):
+            with open(img_path, "rb") as img:
+                url = S3ImgUploader(img).upload_restaurant_img(self.restaurant_id)
+                self.images.append(url)
+                return url
+        return None
 
 
 # Restaurant - User 관계의 중간테이블
