@@ -12,7 +12,7 @@ class Restaurant(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     location = models.GeometryField(srid=4326)
     address = models.CharField()
-    star_avg = models.DecimalField(max_digits=10, decimal_places=2)
+    star_avg = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     images = ArrayField(models.URLField())
     
     is_24_hours = models.BooleanField(default=True)

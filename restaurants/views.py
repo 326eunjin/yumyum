@@ -111,7 +111,7 @@ class RestaurantFilterView(APIView):
         print(restaurants.count())
         for restaurant in restaurants:
             restaurant_ids.append(restaurant.restaurant_id)
-        restaurant_ids.sort(key=lambda x : Restaurant.objects.get(pk=x).calculate_star_avg())
+        restaurant_ids.sort(key=lambda x : Restaurant.objects.get(pk=x).star_avg)
         return Response({
             "status": "success",
             "message": "Nearby restaurants retrieved successfully",
@@ -357,6 +357,9 @@ class WriteReivew(APIView):
             except Restaurant.DoesNotExist:
                 return Response({"error": "레스토랑을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
             review, created = Review.objects.get_or_create(restaurant=restaurant, user=user, stars=stars, menu=menu, contents=contents)
+            star_avg = Review.objects.filter(restaurant=restaurant).aggregate(Avg('stars'))['stars__avg']
+            restaurant.star_avg = star_avg
+            restaurant.save()
             if created:
 
                 response_data = {
