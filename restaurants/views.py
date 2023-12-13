@@ -12,6 +12,7 @@ from datetime import datetime
 from .serializers import RestaurantSerializer, OperatingHourSerializer
 from .models import Restaurant, Reservation
 from reviews.models import Review
+from config import settings
 from utils import category
 
 # Create your views here.
@@ -276,7 +277,7 @@ class RestaurantManagementView(APIView):
         return Response({
             "status": "success",
             "message": "Save successful",
-            "base_url": "https://yumyum-s3-bucket.s3.ap-northeast-2.amazonaws.com/",
+            "base_url": settings.S3_base_url,
             "url": url,
         }, status=status.HTTP_200_OK)
     

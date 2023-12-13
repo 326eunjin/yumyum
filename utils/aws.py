@@ -4,8 +4,6 @@ class S3ImgUploader:
     """
         AWS_ACCESS_KEY 및 AWS_SECRET_ACCESS_KEY 환경변수 설정 필요
     """
-    base_img_url = "https://yumyum-s3-bucket.s3.ap-northeast-2.amazonaws.com/"
-    
     def __init__(self, file):
         self.file = file
 
@@ -19,6 +17,16 @@ class S3ImgUploader:
     def upload_restaurant_img(self, restaurant_id:int=0):
         dir = f"{restaurant_id}/" if restaurant_id > 0 else ""
         return self.__upload(f'restaurants/{dir}')
+        
+    def delete(self, url):
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
+        )
+        
+        s3_client.delete_object(Bucket="yumyum-s3-bucket", Key=url)
+        
         
     def __upload(self, dir:str=""):
         s3_client = boto3.client(

@@ -224,3 +224,5 @@ SIMPLE_JWT = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
+
+S3_base_url = "https://yumyum-s3-bucket.s3.ap-northeast-2.amazonaws.com/"
