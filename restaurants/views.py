@@ -149,17 +149,18 @@ class RestaurantAlternativeView(APIView):
         categories = restaurant.category
         
         query = Q(location__distance_lte=(location,D(km=1)))
+        query = ~Q(restaurant_id=restaurant_id)
         for category_id in categories:
             query &= Q(category__contains=[category_id])
             
-        restuarant_list = []
+        restaurant_list = []
         restaurants = Restaurant.objects.filter(query)
         for alter_restaurant in restaurants:
             point1 = (float(latitude), float(longitude))
             point2 = (float(alter_restaurant.latitude), float(alter_restaurant.longitude))
             dist = distance(point1, point2).meters
             
-            restuarant_list.append({
+            restaurant_list.append({
                 "restaurant_id": alter_restaurant.restaurant_id,
                 "name": alter_restaurant.name,
                 "category": alter_restaurant.category,
@@ -170,10 +171,11 @@ class RestaurantAlternativeView(APIView):
                 "etc_reason": alter_restaurant.etc_reason,
                 "distance": f'{dist:.2f}m'
             })
+        restaurant_list.sort(key=lambda x:float(x['distance'][:-2]))
         return Response({
             "status": "success",
             "message": "Nearby restaurants retrieved successfully",
-            "data": restuarant_list
+            "data": restaurant_list
         }, status=status.HTTP_200_OK)
 
 class RestaurantWaitingView(APIView):
