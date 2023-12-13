@@ -53,38 +53,49 @@ class CreateRestaurantView(APIView):
 
 class RestaurantInfoView(APIView):
     def get(self, request, restaurant_id):
-        restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).annotate(star_avg=Avg('review__stars')).first()
-        if restaurant:
-            star_average = restaurant.star_avg if restaurant.star_avg is not None else 0
+        restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).first()
+        if not restaurant:
             return Response({
-                "status": "success",
-                "message": "Restaurant information retrieved successfully",
-                "data": {
-                    "restaurant_id": restaurant_id,
-                    "name": restaurant.name,
-                    "star_avg" : star_average,
-                    "category": restaurant.category,
-                    "longitude": restaurant.longitude,
-                    "latitude": restaurant.latitude,
-                    "address": restaurant.address,
-                    "waiting": restaurant.queue.count(),
-                    "is_24_hours": restaurant.is_24_hours,
-                    "day_of_week": restaurant.day_of_week,
-                    "start_time": str(restaurant.start_time.strftime("%H:%M")),
-                    "end_time": str(restaurant.end_time.strftime("%H:%M")),
-                    "etc_reason": restaurant.etc_reason,
-                    "created_at": restaurant.created_at,
-                    "updated_at": restaurant.updated_at,
+                "status": "error",
+                "error": {
+                    "code": 404,
+                    "message": "Not Found",
+                    "details": f"Restaurant with ID {restaurant_id} not found."
                 }
-            }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        review1, review2 = Review.objects.order_by('-created_at')[:2]
         return Response({
-            "status": "error",
-            "error": {
-                "code": 404,
-                "message": "Not Found",
-                "details": f"Restaurant with ID {restaurant_id} not found."
+            "status": "success",
+            "message": "Restaurant information retrieved successfully",
+            "data": {
+                "restaurant_id": restaurant_id,
+                "name": restaurant.name,
+                "star_avg" : restaurant.star_avg,
+                "category": restaurant.category,
+                "longitude": restaurant.longitude,
+                "latitude": restaurant.latitude,
+                "address": restaurant.address,
+                "waiting": restaurant.queue.count(),
+                "is_24_hours": restaurant.is_24_hours,
+                "day_of_week": restaurant.day_of_week,
+                "start_time": str(restaurant.start_time.strftime("%H:%M")) if restaurant.start_time else "00:00",
+                "end_time": str(restaurant.end_time.strftime("%H:%M")) if restaurant.end_time else "00:00",
+                "etc_reason": restaurant.etc_reason,
+                "created_at": restaurant.created_at,
+                "updated_at": restaurant.updated_at,
+                "review1": {
+                    "user_name": review1.user.name,
+                    "stars": review1.stars,
+                    "contents": review1.contents,
+                },
+                "review2": {
+                    "user_name": review2.user.name,
+                    "stars": review2.stars,
+                    "contents": review2.contents,
+                }
             }
-        }, status=status.HTTP_404_NOT_FOUND)
+        }, status=status.HTTP_200_OK)
 
 ############## 크롤링으로 키워드 기반 필터링 기능(분위기, 가격 등) 추가 필요 ###############
 ############## category getlist말고 ','로 나뉜 문자열로 받기 ######################
