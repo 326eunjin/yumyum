@@ -27,7 +27,7 @@ class ReviewThread(APIView):  # thread 만들기
                     }
                     }, status=status.HTTP_400_BAD_REQUEST)
 
-            user_location = Point(float(user_latitude), float(user_longitude), srid=4326)
+            user_location = Point(float(user_longitude), float(user_latitude), srid=4326)
 
             # 1km 반경 안에 있는 리뷰를 가져오기
             reviews = (
