@@ -34,7 +34,7 @@ class ReviewThread(APIView):  # thread 만들기
                 Review.objects.annotate(
                     distance=Distance("restaurant__location", user_location)
                 )
-                .filter(distance__lte=D(km=1))
+                .filter(distance__lte=D(m=500))
                 .order_by("created_at")
             )
 
@@ -45,8 +45,8 @@ class ReviewThread(APIView):  # thread 만들기
                         "review_id": review.review_id,
                         "restaurant_name": review.restaurant.name,
                         "category": review.restaurant.category,
-                        "user_id": user.user_id,
-                        "user_name": user.name,
+                        "user_id": review.user.user_id,
+                        "user_name": review.user.name,
                         "stars": review.stars,
                         "menu": review.menu,
                         "contents": review.contents,
@@ -59,4 +59,13 @@ class ReviewThread(APIView):  # thread 만들기
                 "message": "Nearby restauant reviews retrived sucessfully.",
                 "reviews": review_list
                 }, status=status.HTTP_200_OK)
+            
+        return Response({
+                "status":"error",
+                "error" : {
+                    "code": 401,
+                    "message": "Unathorized",
+                    "details": "User not logged in or unauthorized to access this resource"
+                }
+            }, status = status.HTTP_401_UNAUTHORIZED)
         
