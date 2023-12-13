@@ -97,6 +97,7 @@ class RestaurantInfoView(APIView):
             }
         }, status=status.HTTP_200_OK)
 
+
 class RestaurantFilterView(APIView):
     def get(self, request):
         user_restaurant_name = request.GET.get('restaurant_name', "")
@@ -105,7 +106,7 @@ class RestaurantFilterView(APIView):
         user_latitude = request.GET.get('latitude')
         if not (user_longitude and user_latitude):
             return Response({"error": "Invalid request. Please check your input data"}, status=status.HTTP_400_BAD_REQUEST)
-        user_location = Point((float(user_latitude), float(user_longitude)), srid=4326)
+        user_location = Point((float(user_longitude), float(user_latitude)), srid=4326)
 
         # 요청에 해당하는 query 작성
         now = datetime.now()
