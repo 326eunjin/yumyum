@@ -66,7 +66,7 @@ class RestaurantInfoView(APIView):
                     "longitude": restaurant.longitude,
                     "latitude": restaurant.latitude,
                     "address": restaurant.address,
-                    "waiting": len(restaurant.queue.all()),
+                    "waiting": restaurant.queue.count(),
                     "is_24_hours": restaurant.is_24_hours,
                     "day_of_week": restaurant.day_of_week,
                     "start_time": str(restaurant.start_time.strftime("%H:%M")),
@@ -89,27 +89,28 @@ class RestaurantInfoView(APIView):
 ############## category getlist말고 ','로 나뉜 문자열로 받기 ######################
 class RestaurantFilterView(APIView):
     def get(self, request):
-        user_restaurant_name = request.GET.get('restaurant_name')
-        user_category = request.GET.getlist('category')
+        user_restaurant_name = request.GET.get('restaurant_name', "")
+        user_category = request.GET.get('category', [])
         user_longitude = request.GET.get('longitude')
         user_latitude = request.GET.get('latitude')
         if not (user_longitude and user_latitude):
             return Response({"error": "Invalid request. Please check your input data"}, status=status.HTTP_400_BAD_REQUEST)
-        user_location = Point((float(user_longitude), float(user_latitude)), srid=4326)
+        user_location = Point((float(user_latitude), float(user_longitude)), srid=4326)
 
         # 요청에 해당하는 query 작성
         now = datetime.now()
-        query = Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now) # 운영시간 확인
-        query &= Q(name__contains=user_restaurant_name)                 # 이름 검색
+        query = Q(name__contains=user_restaurant_name)                 # 이름 검색
+        query &= (Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now)) # 운영시간 확인
         query &= Q(location__distance_lte=(user_location, D(km=0.1)))   # 반경 100m
-        for category_id in user_category:
-            query &= Q(category__contains=[category_id])
+        if user_category:
+            for category_id in user_category.split(','):
+                query &= Q(category__contains=[category_id])
         
         restaurant_ids = []
         restaurants = Restaurant.objects.filter(query)
+        print(restaurants.count())
         for restaurant in restaurants:
             restaurant_ids.append(restaurant.restaurant_id)
-            
         restaurant_ids.sort(key=lambda x : Restaurant.objects.get(pk=x).calculate_star_avg())
         return Response({
             "status": "success",
