@@ -76,7 +76,7 @@ class RestaurantInfoView(APIView):
                 "longitude": restaurant.longitude,
                 "latitude": restaurant.latitude,
                 "address": restaurant.address,
-                "waiting": restaurant.queue.count(),
+                "waiting": restaurant.user_set.count(),
                 "is_24_hours": restaurant.is_24_hours,
                 "day_of_week": restaurant.day_of_week,
                 "start_time": str(restaurant.start_time.strftime("%H:%M")) if restaurant.start_time else "00:00",
@@ -98,7 +98,6 @@ class RestaurantInfoView(APIView):
         }, status=status.HTTP_200_OK)
 
 ############## 크롤링으로 키워드 기반 필터링 기능(분위기, 가격 등) 추가 필요 ###############
-############## category getlist말고 ','로 나뉜 문자열로 받기 ######################
 class RestaurantFilterView(APIView):
     def get(self, request):
         user_restaurant_name = request.GET.get('restaurant_name', "")
