@@ -148,5 +148,3 @@ for restaurant_id in restaurant_ids:
     })
 
 inserted_pks = seeder.execute()
-
-print(f"Dummy data inserted. Review IDs: {inserted_pks[Review]}")
