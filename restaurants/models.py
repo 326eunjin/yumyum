@@ -31,9 +31,10 @@ class Restaurant(models.Model):
         managed = False
         db_table = "Restaurant"
     
-    def calculate_star_avg(self):
-        # 해당 레스토랑의 리뷰를 기반으로 평균 별점을 계산
+    def update_star_avg(self):
+        # 해당 레스토랑의 리뷰를 기반으로 평균 별점을 계산 후 저장
         avg_rating = self.review_set.aggregate(models.Avg('stars'))['stars__avg']
+        self.save()
         return avg_rating if avg_rating is not None else 0
     
     def save_img(self, img_path):
