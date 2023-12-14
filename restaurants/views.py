@@ -378,8 +378,7 @@ class RestaurantReviewListView(APIView):
                 }
         return Response(error_response2, status = status.HTTP_404_NOT_FOUND)
 
-class WriteReivew(APIView):   
-    permission_classes=[AllowAny]
+class WriteReivew(APIView):
     @transaction.atomic
     def post(self, request, restaurant_id):
         user = request.user
@@ -407,7 +406,7 @@ class WriteReivew(APIView):
                         "restaurant_id": restaurant.restaurant_id,
                         "restaurant_name": restaurant.name,
                         "review_id": review.review_id,
-                        "user_id": user.user_id,
+                        "user_id": review.user.user_id,
                         "stars": review.stars,
                         "menu": review.menu,
                         "contents": review.contents,
