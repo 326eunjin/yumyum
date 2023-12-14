@@ -121,7 +121,7 @@ class RestaurantFilterView(APIView):
         restaurants = Restaurant.objects.filter(query)
         print(restaurants.count())
         for restaurant in restaurants:
-            # review1, review2 = Review.objects.order_by('-created_at')[:2]
+            review1, review2 = Review.objects.order_by('-created_at')[:2]
             restaurant_ids.append({
                 "restaurant_id": restaurant.restaurant_id,
                 "name": restaurant.name,
@@ -130,7 +130,7 @@ class RestaurantFilterView(APIView):
                 "longitude": restaurant.longitude,
                 "latitude": restaurant.latitude,
                 "address": restaurant.address,
-                # "waiting": restaurant.user_set.count(),
+                "waiting": restaurant.user_set.count(),
                 "image": restaurant.image,
                 "is_24_hours": restaurant.is_24_hours,
                 "day_of_week": restaurant.day_of_week,
@@ -139,16 +139,16 @@ class RestaurantFilterView(APIView):
                 "etc_reason": restaurant.etc_reason,
                 "created_at": restaurant.created_at,
                 "updated_at": restaurant.updated_at,
-                # "review1": {
-                #     "user_name": review1.user.name,
-                #     "stars": review1.stars,
-                #     "contents": review1.contents,
-                # },
-                # "review2": {
-                #     "user_name": review2.user.name,
-                #     "stars": review2.stars,
-                #     "contents": review2.contents,
-                # }
+                "review1": {
+                    "user_name": review1.user.name,
+                    "stars": review1.stars,
+                    "contents": review1.contents,
+                },
+                "review2": {
+                    "user_name": review2.user.name,
+                    "stars": review2.stars,
+                    "contents": review2.contents,
+                }
             })
         restaurant_ids.sort(key=lambda x : x['star_avg'])
         return Response({
