@@ -130,7 +130,7 @@ class RestaurantFilterView(APIView):
                 "longitude": restaurant.longitude,
                 "latitude": restaurant.latitude,
                 "address": restaurant.address,
-                "waiting": restaurant.user_set.count(),
+                # "waiting": restaurant.user_set.count(),
                 "image": restaurant.image,
                 "is_24_hours": restaurant.is_24_hours,
                 "day_of_week": restaurant.day_of_week,
