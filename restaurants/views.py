@@ -154,7 +154,7 @@ class RestaurantFilterView(APIView):
         return Response({
             "status": "success",
             "message": "Nearby restaurants retrieved successfully",
-            "restaurants": restaurant_ids,
+            "restaurants": restaurant_ids[:5],
         },status=status.HTTP_200_OK)
 
 class RestaurantAlternativeView(APIView):
