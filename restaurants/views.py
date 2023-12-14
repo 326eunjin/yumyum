@@ -63,7 +63,7 @@ class RestaurantInfoView(APIView):
                 }
             }, status=status.HTTP_404_NOT_FOUND)
             
-        review1, review2 = Review.objects.order_by('-created_at')[:2]
+        review1, review2 = restaurant.review_set.order_by('-created_at')[:2]
         return Response({
             "status": "success",
             "message": "Restaurant information retrieved successfully",
