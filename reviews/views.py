@@ -35,7 +35,7 @@ class ReviewThread(APIView):  # thread 만들기
                     distance=Distance("restaurant__location", user_location)
                 )
                 .filter(distance__lte=D(m=500))
-                .order_by("created_at")[:20]
+                .order_by("-created_at")[:20]
             )
 
             review_list = []
