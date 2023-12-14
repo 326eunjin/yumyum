@@ -503,10 +503,42 @@ class NearbyRestaurantInfoView(APIView):
         
         now = datetime.now()
         user_location = Point((longitude, latitude), srid=4326)
+        if dist == 0:
+            restaurant = Restaurant.objects.filter(latitude=latitude, longitude=longitude).first()
+            if not restaurant:
+                return Response({
+                    "status": "error",
+                    "error": {
+                        "code": 404,
+                        "message": "Not Found",
+                        "details": "위치에 해당하는 식당 없음"
+                    }
+                }, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+            "status": "success",
+            "message": "Restaurant information retrieved successfully",
+            "data": {
+                "restaurant_id": restaurant.restaurant_id,
+                "name": restaurant.name,
+                "star_avg" : restaurant.star_avg,
+                "category": restaurant.category,
+                "longitude": restaurant.longitude,
+                "latitude": restaurant.latitude,
+                "address": restaurant.address,
+                "waiting": restaurant.user_set.count(),
+                "image": restaurant.image,
+                "is_24_hours": restaurant.is_24_hours,
+                "day_of_week": restaurant.day_of_week,
+                "start_time": str(restaurant.start_time.strftime("%H:%M")) if restaurant.start_time else "00:00",
+                "end_time": str(restaurant.end_time.strftime("%H:%M")) if restaurant.end_time else "00:00",
+                "etc_reason": restaurant.etc_reason,
+                "created_at": restaurant.created_at,
+                "updated_at": restaurant.updated_at,
+            }
+        }, status=status.HTTP_200_OK)
         query = Q(location__distance_lte=(user_location, D(km=dist)))
         query &= (Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now)) # 운영시간 확인
         restaurants = Restaurant.objects.filter(query)
-        
         restaurant_list = []
         for restaurant in restaurants:
             restaurant_list.append({
