@@ -112,7 +112,7 @@ class RestaurantFilterView(APIView):
         now = datetime.now()
         query = Q(name__contains=user_restaurant_name)                 # 이름 검색
         query &= (Q(is_24_hours=True) | Q(start_time__lte=now, end_time__gte=now)) # 운영시간 확인
-        query &= Q(location__distance_lte=(user_location, D(km=0.1)))   # 반경 100m
+        query &= Q(location__distance_lte=(user_location, D(km=0.5)))   # 반경 100m
         if user_category:
             for category_id in user_category.split(','):
                 query &= Q(category__contains=[category_id])
