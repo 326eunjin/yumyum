@@ -189,8 +189,8 @@ class UserInfoView(APIView):
 
     # 유저 삭제
     @transaction.atomic
-    def delete(self, request, user_id):
-        user = User.objects.filter(user_id=user_id).first()
+    def delete(self, request):
+        user = request.user
         if not user:
             return Response({
                 "status": "error",
